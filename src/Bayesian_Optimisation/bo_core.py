@@ -10,6 +10,21 @@ from botorch.acquisition import (
     UpperConfidenceBound,
     )
 from botorch.optim import optimize_acqf
+from botorch.test_functions import Hartmann, Ackley, Branin
+
+
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+dtype = torch.double
+
+
+def generate_initial_data(n=10, objective=None, bounds=None):
+    """ Generate training data """
+    d = bounds.shape[1]
+    train_X = torch.rand(n, d, device=device, dtype=dtype)
+    # scale values of x if 0-1 isn't actually the bounds of the problem
+    train_X = bounds[0] + (bounds[1] - bounds[0]) * train_X
+    train_Y = objective(train_X).unsqueeze(-1)
+    return train_X, train_Y
 
 def build_GP_surrogate(train_X, train_Y):
     """
@@ -103,3 +118,53 @@ def update_dataset(train_X, train_Y, candidate, observation):
     train_X = torch.cat([train_X, candidate], dim=0)
     train_Y = torch.cat([train_Y, observation], dim=0)
     return train_X, train_Y 
+
+def bayesian_optimization(n_iter, objective, acq, seed):
+    """
+    Performs Bayesian Optimization. 
+    Parameter(s):
+        n_iter (int): The number of iterations to run
+        objective (callable): The objective function to optimize
+        acq (str): The acquisition function to use
+        seed (int): The random seed for reproducibility
+    Returns:
+        history (list): A list of the best observations at each iteration
+    """
+    history = []
+
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    dtype = torch.double
+
+    torch.manual_seed(seed)
+    if objective == "hartmann":
+        hartmann = Hartmann(negate=True).to(device=device)
+        objective = hartmann
+    elif objective == "ackley":
+        ackley = Ackley(negate=True).to(device=device)
+        objective = ackley
+    elif objective == "branin":
+        branin = Branin(negate=True).to(device=device)
+        objective = branin
+
+    bounds = objective.bounds.to(device=device, dtype=dtype)
+
+    # Generate initial observations
+    train_X, train_Y = generate_initial_data(n=10, objective=objective, bounds=bounds)
+
+    # Run BO
+    for iteration in range(n_iter):
+        model = build_GP_surrogate(train_X,train_Y)
+        acquisition = build_acquisition(model, train_Y, acq=acq)
+        candidate = optimize_candidate(acquisition, bounds)
+        observation = evaluate_candidate(candidate, objective)
+        train_X, train_Y = update_dataset(train_X, train_Y, candidate, observation)
+
+        best_value = train_Y.max()
+
+        print(
+            f"Iteration {iteration + 1}: "
+            f"best = {best_value.item():.4f}"
+        )
+        history.append(best_value.item())
+
+    return history

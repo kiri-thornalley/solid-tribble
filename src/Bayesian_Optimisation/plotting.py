@@ -14,6 +14,9 @@ def convergence_regret_plot(csv_file, benchmark=None, acq=None, optimal_value=No
         benchmark (str): The name of the benchmark function.
         acq (str): The name of the acquisition function.
     """
+    sns.set_theme(context="paper", style="ticks", palette="viridis")
+    palette = sns.color_palette()
+    
     OPTIMAL_VALUES = {
         "hartmann": +3.322,
         "branin": -0.397,
@@ -22,28 +25,21 @@ def convergence_regret_plot(csv_file, benchmark=None, acq=None, optimal_value=No
     if benchmark is not None:
         optimal_value = OPTIMAL_VALUES[benchmark]
     elif benchmark is None:
-        if optimal_value is None:
-            raise ValueError("Optimal value not specified")
+        if csv_file is None:
+            raise ValueError("Neither csv nor analytical benchmark specified.")
     
-    print(f"Optimal Value {optimal_value}")
 
     ## == Convergence plot == ##
     """
     Best observed value of the objective function found so far, against iteration number. 
     Demonstrates how fast the optimizer approaches the maximum value. 
     """
-    sns.set_theme(context="paper", style="ticks", palette="viridis")
-    palette = sns.color_palette()
 
-    OPTIMAL_VALUES = {
-                "hartmann": +3.322,
-                "branin": -0.397,
-                "ackley": 0.0
-            }
     df = pd.read_csv(csv_file)  
 
     benchmarks = df["objective"].unique()
     acqs = df["method"].unique()
+    #if df exists: 
     fig, axes = plt.subplots(1, len(benchmarks), figsize=(15, 5))
 
     for col, benchmark in enumerate(benchmarks):

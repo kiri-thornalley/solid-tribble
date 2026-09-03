@@ -1,6 +1,6 @@
 from src.Bayesian_Optimisation.bo_core import *
-from experiments.random_search import random_search
-from plotting import *
+from src.Bayesian_Optimisation.plotting import convergence_regret_plot
+from src.Bayesian_Optimisation.random_search import random_search
 import pandas as pd
 from botorch.test_functions import Branin, Ackley, Hartmann
 
@@ -21,9 +21,9 @@ OBJECTIVES = {
 
 results = []
 
-n_iter=20
+n_iter=5
 
-for seed in range(10):
+for seed in range(1):
     for objective_name in ["branin", "ackley", "hartmann"]:
             objective = OBJECTIVES[objective_name]
             print(f"Running experiment for {objective_name}, method: Random, with seed {seed}")
@@ -38,7 +38,7 @@ for seed in range(10):
                 })
             for acq in ["EI", "UCB"]:
                 print(f"Running experiment for {objective_name}, method: BO-{acq}, with seed {seed}")
-                bo_history = bayesian_optimization(n_iter=n_iter, objective=objective, acq=acq, seed=seed)
+                bo_history = bayesian_optimization(n_iter=n_iter, objective=objective, acq=acq, seed=seed, generate=True)
                 for iteration, value in enumerate(bo_history, start=1):
                     results.append({
                         "seed": seed,
@@ -49,8 +49,7 @@ for seed in range(10):
                     })
 
 df = pd.DataFrame(results)
-df.to_csv("results/benchmark.csv", index=False)
-df = pd.read_csv("results/benchmark.csv")
+df.to_csv("data/benchmark.csv", index=False)
+df = pd.read_csv("data/benchmark.csv")
 
-
-convergence_regret_plot("results/benchmark.csv")
+convergence_regret_plot("data/benchmark.csv")

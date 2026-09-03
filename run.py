@@ -6,24 +6,21 @@ from src.Bayesian_Optimisation.bo_core import (
     build_GP_surrogate, build_acquisition,
     optimize_candidate, evaluate_candidate,
     update_dataset,
+    generate_initial_data
     )
+from experiments.random_search import random_search, plot
 from botorch.test_functions import Hartmann, Ackley, Branin
 
 import warnings
 from botorch.exceptions.warnings import InputDataWarning
 
+torch.manual_seed(42)
+
 """ turn off "Input features is not contained to the unit cube" warning. 
 I know, deliberate choice to work in the native domain to simplify the code. """
 warnings.filterwarnings("ignore", category=InputDataWarning)
 
-def generate_initial_data(n=10, objective=None, bounds=None):
-    """ Generate training data """
-    d = bounds.shape[1]
-    train_X = torch.rand(n, d, device=device, dtype=dtype)
-    # scale values of x if 0-1 isn't actually the bounds of the problem
-    train_X = bounds[0] + (bounds[1] - bounds[0]) * train_X
-    train_Y = objective(train_X).unsqueeze(-1)
-    return train_X, train_Y
+
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 dtype = torch.double
@@ -51,9 +48,10 @@ bounds = objective.bounds.to(device=device, dtype=dtype)
 train_X, train_Y = generate_initial_data(n=10, objective=objective, bounds=bounds)
 
 if __name__ == "__main__":
-    best_observations = []
+    history = []
+    n_iter = 20
     # Run BO
-    for iteration in range(20):
+    for iteration in range(n_iter):
         model = build_GP_surrogate(train_X,train_Y)
         acquisition = build_acquisition(model, train_Y, acq=acq)
         candidate = optimize_candidate(acquisition, bounds)
@@ -66,6 +64,9 @@ if __name__ == "__main__":
             f"Iteration {iteration + 1}: "
             f"best = {best_value.item():.4f}"
         )
-        best_observations.append(best_value.item())
+        history.append(best_value.item())
 
-    convergence_regret_plot(best_observations, benchmark=args.function, acq=acq)
+    convergence_regret_plot(history, benchmark=args.function, acq=acq)
+
+    best_history = random_search(n_iter=n_iter, objective=objective, seed=42)
+    plot(best_history, best_value, objective)      
