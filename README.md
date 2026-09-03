@@ -16,6 +16,8 @@ Median best-so-far on a 10-seed study, shows that variations of BO (EI, UCB) con
 
 ### Experiment 2
 Evaluated BO-EI, BO-UCB and Thompson Sampling on a discrete BO problem, to investigate how efficiently each method discovers low-formation energy materials from a finite candidate set. 
+<img width="800" height="600" alt="materials_convergence_plot" src="https://github.com/user-attachments/assets/490f1777-737d-423f-b041-03b0a257ef40" />
 
+Median best-so-far on a 10-seed study, UCB showed greater exploratory behaviour in the discrete materials search, selecting materials with higher posterior uncertainty; and exploring areas not well represented by the initial data the GP was trained on. 
 ## Limitations
 Materials Project API is used as a stand-in for the expensive experimental evaluation of novel materials; the present work does not integrate physical synthesis or characterisation hardware.  
