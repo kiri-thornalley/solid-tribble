@@ -18,7 +18,7 @@ warnings.filterwarnings("ignore", category=InputDataWarning)
 
 results = []
 
-n_iter = 20
+n_iter = 40
 
 for seed in range(10):
 
