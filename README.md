@@ -5,7 +5,7 @@ Developing novel materials and predicting their properties can be both time-cons
 A Gaussian Process surrogate was fitted to the search space and iteratively updated as decisions were made. At each step, the acquisition function is evaluated and the material with the highest value was selected as the next point to explore. 
 
 ## Experimental Setup
-Finite set of 200 materials were sampled from the Materials Project. Initially, 100 materials were used to initially train the GP, a further 50 form part of the candidate pool the model can choose from and the remainder form the held-out test set.
+Finite set of 200 materials were sampled from the Materials Project. Initially, 10 materials were used to initially train the GP, a further 140 form part of the candidate pool the model can choose from and the remainder form the held-out test set.
 Features band_gap, Volume, density, nElements and eFermi were used to train the Gaussian Process, and formation_energy was used as the target variable. 10 random seeds were applied to each experiment. 
 
 ## Results
