@@ -68,14 +68,10 @@ def materials_pipeline(seed):
 
     print("Initial best formation energy:",
             init_df["formation_energy"].min())
-    
     print(
-        init_df.loc[
-            init_df["formation_energy"].idxmin(),
-            ["material_id", "formation_energy"]
-        ]
-    )
-
+    "Best candidate pool material:",
+    candidate_pool_df["formation_energy"].min()
+)
     return init_X, init_Y, candidate_X, candidate_pool_df
 if __name__=="__main__":
     materials_pipeline()

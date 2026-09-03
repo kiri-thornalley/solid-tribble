@@ -21,9 +21,9 @@ OBJECTIVES = {
 
 results = []
 
-n_iter=5
+n_iter=40
 
-for seed in range(1):
+for seed in range(10):
     for objective_name in ["branin", "ackley", "hartmann"]:
             objective = OBJECTIVES[objective_name]
             print(f"Running experiment for {objective_name}, method: Random, with seed {seed}")
